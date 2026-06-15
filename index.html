@@ -22,7 +22,9 @@ button{padding:11px 20px;margin:8px;border-radius:8px;border:none;font-size:17px
 .cell{background:#123c7a;padding:18px;border:2px solid white;font-weight:bold;min-height:70px;display:flex;align-items:center;justify-content:center}
 .header{font-size:22px;background:#092b66}
 .clue{background:#1e5bb8;cursor:pointer;font-size:31px;color:#ffd84d}
-.clue.used{background:#222;color:#555;cursor:not-allowed}
+.clue.used{background:#222;color:#777;cursor:pointer}
+.clue.used:hover{background:#333;color:#ffd84d}
+.reviewNote{background:#fff4e6;border-left:6px solid #f59e0b;padding:10px;margin:10px 0;text-align:left}
 #questionModal{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:10}
 #card{background:white;color:black;padding:28px;width:84%;max-width:900px;border-radius:14px;box-shadow:0 0 30px rgba(255,255,255,.35)}
 #qTitle{font-size:34px}
@@ -97,7 +99,7 @@ svg.chartSvg{width:100%;height:auto;display:block}
 </head>
 <body>
 <div id="topBar"><button id="endGameBtn" onclick="endGame()">End Game</button></div>
-<h1>Exponent Rules Jeopardy v2</h1>
+<h1>Product and Quotient Rule Jeopardy</h1>
 
 <div id="setup">
 <h2>Set Up Teams</h2>
@@ -204,19 +206,22 @@ b.innerHTML=html;
 }
 
 function openQ(c,r,cell){
-if(cell.classList.contains("used")) return;
 currentCell=cell;
 currentQuestion=questions[c][r];
 currentValue=currentQuestion.value;
 let id=`c${c}-${r}`;
 currentQuestion.id=id;
-currentQuestion.answerShownTemp=false;
+let qrec=questionLog[id];
+currentQuestion.answerShownTemp=!!qrec;
 document.getElementById("qTitle").innerText=currentQuestion.category+" - $"+currentQuestion.value;
 document.getElementById("qText").innerHTML=currentQuestion.question;
 document.getElementById("answer").innerHTML="Answer: "+currentQuestion.answer;
-document.getElementById("answer").style.display="none";
+document.getElementById("answer").style.display=qrec ? "block" : "none";
 document.getElementById("scoreButtons").innerHTML="";
 document.getElementById("questionModal").style.display="flex";
+if(qrec){
+  showAnswer(true);
+}
 }
 
 function ensureQuestionLog(){
@@ -228,9 +233,10 @@ if(!questionLog[id]){
 return questionLog[id];
 }
 
-function showAnswer(){
+function showAnswer(reviewMode=false){
 document.getElementById("answer").style.display="block";
-let buttons=`<div class="noteBox" style="text-align:left;margin:10px 0"><b>Step 1: Award Jeopardy points</b> to the one team that won the question.<br><b>Step 2: Mark learning data</b> for every team that answered correctly. The report uses Step 2.</div>`;
+let buttons= reviewMode ? `<div class="reviewNote"><b>Reviewing an answered question.</b> You can view the answer and adjust points/correct teams if needed.</div>` : ``;
+buttons+=`<div class="noteBox" style="text-align:left;margin:10px 0"><b>Step 1: Award Jeopardy points</b> to the one team that won the question.<br><b>Step 2: Mark learning data</b> for every team that answered correctly. The report uses Step 2.</div>`;
 buttons+=`<h3>1. Award points to ONE team</h3><div>`;
 teams.forEach((t,i)=>{buttons+=`<button class="scoreBtn" id="awardBtn${i}" onclick="toggleAward(${i})">Award ${t.name}</button>`;});
 buttons+=`</div><h3>2. Mark ALL teams that got it correct</h3><div>`;
