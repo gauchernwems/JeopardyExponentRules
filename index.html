@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Product and Quotient Rule Jeopardy</title>
+<style>
+body{font-family:Arial,sans-serif;background:#06172d;color:white;text-align:center;margin:0;padding:20px}
+h1{margin:10px;font-size:42px;color:#ffd84d}
+#topBar{position:fixed;top:10px;right:10px;z-index:5}
+#endGameBtn{background:#d62828;color:white;font-weight:bold;padding:8px 13px;font-size:14px}
+#setup{max-width:800px;margin:30px auto;background:#123c7a;padding:25px;border-radius:14px;border:2px solid white}
+input,select{font-size:20px;padding:8px;margin:8px;border-radius:6px;border:none}
+button{padding:11px 20px;margin:8px;border-radius:8px;border:none;font-size:17px;cursor:pointer}
+
+.directionsBox{background:#eef5ff;color:#071b38;text-align:left;border:2px solid white;border-radius:12px;padding:12px 16px;margin:18px auto;max-width:720px}
+.directionsBox summary{font-size:20px;font-weight:bold;cursor:pointer;color:#06172d}
+.directionsBox ol{margin:12px 0 0 22px;padding:0;font-size:16px;line-height:1.45}
+.directionsBox .important{font-weight:bold;color:#b00020}
+#scores{margin:15px auto;font-size:20px;font-weight:bold;display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.scoreBox{background:#092b66;border:2px solid white;padding:10px 15px;border-radius:10px}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:950px;margin:auto}
+.cell{background:#123c7a;padding:18px;border:2px solid white;font-weight:bold;min-height:70px;display:flex;align-items:center;justify-content:center}
+.header{font-size:22px;background:#092b66}
+.clue{background:#1e5bb8;cursor:pointer;font-size:31px;color:#ffd84d}
+.clue.used{background:#222;color:#555;cursor:not-allowed}
+#questionModal{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:10}
+#card{background:white;color:black;padding:28px;width:84%;max-width:900px;border-radius:14px;box-shadow:0 0 30px rgba(255,255,255,.35)}
+#qTitle{font-size:34px}
+#qText{font-size:40px;line-height:1.4;margin:25px}
+#answer{font-size:32px;color:#0b3b84;margin:15px}
+#scoreButtons{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.scoreBtn{background:#e9e9e9;color:black}
+.scoreBtn.awarded{background:#29a329;color:white;font-weight:bold}
+#reportModal{position:fixed;inset:0;background:white;color:black;display:none;z-index:30;overflow:auto;text-align:left;padding:30px}
+#reportContent{max-width:1100px;margin:auto}
+.reportTitle{text-align:center;color:#06172d}
+.reportBtns{text-align:center;margin:15px}
+.reportBtns button{background:#123c7a;color:white}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+th,td{border:1px solid #999;padding:7px;vertical-align:top}
+th{background:#e8eef8}
+.section{margin-top:22px}
+.cardRow{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0}
+.cardStat{flex:1;min-width:190px;background:#f3f6fb;border-left:6px solid #123c7a;padding:12px}
+.noteBox{background:#f3f6fb;border-left:6px solid #123c7a;padding:12px;margin:12px 0}
+.warning{background:#fff4e6;border-left:6px solid #f59e0b;padding:12px;margin:12px 0}
+.good{background:#effaf0;border-left:6px solid #29a329;padding:12px;margin:12px 0}
+.red{color:#b00020;font-weight:bold}.yellow{color:#9a6700;font-weight:bold}.green{color:#167a1b;font-weight:bold}
+.barWrap{background:#eee;height:18px;border-radius:10px;overflow:hidden}
+.bar{height:18px;background:#123c7a}
+textarea{width:100%;height:180px;font-family:monospace;font-size:12px}
+
+.chartGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin:14px 0}
+.chartCard{background:#ffffff;border:1px solid #ccd6e0;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.chartTitle{font-weight:bold;color:#06172d;margin-bottom:4px;font-size:17px}
+.chartDesc{font-size:12px;color:#444;margin-bottom:8px}
+svg.chartSvg{width:100%;height:auto;display:block}
+.heatCell{font-weight:bold;text-align:center;color:#111}
+.heatStrong{background:#c6efce}.heatDeveloping{background:#ffeb9c}.heatReview{background:#ffc7ce}.heatNotPlayed{background:#eee;color:#666}
+
+.teacherReport{max-width:900px;margin:0 auto;color:#111;background:#fff;font-size:13px;line-height:1.25}
+.teacherTitle{text-align:center;color:#06172d;font-size:28px;margin:4px 0 6px}
+.teacherMeta{display:flex;justify-content:center;gap:18px;font-weight:bold;color:#333;margin-bottom:10px;font-size:12px}
+.teacherGrid.twoCols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+.miniPanel{border:1px solid #cfd8e3;border-radius:10px;padding:10px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:10px}
+.miniPanel h2{font-size:16px;color:#06172d;margin:0 0 6px;border-bottom:1px solid #e5e7eb;padding-bottom:4px}
+.fullWidth{width:auto}
+.miniTable{margin:0;width:100%;font-size:12px}
+.miniTable th,.miniTable td{padding:5px 6px;border:1px solid #d4d4d4}
+.checkList{margin:4px 0 0 0;padding-left:22px}
+.checkList li{margin:3px 0}
+.heatMap{font-size:12px;margin:0;width:100%}
+.heatMap th,.heatMap td{padding:5px;border:1px solid #bbb;text-align:center}
+.legend{font-size:11px;margin-top:6px;text-align:center}
+.legendBox{display:inline-block;width:13px;height:13px;border:1px solid #aaa;margin-left:10px;margin-right:3px;vertical-align:-2px}
+.reportFooter{text-align:center;color:#555;font-size:11px;margin-top:6px}
+.smallNote{margin:0;color:#333}
+
+@media print{
+  body{background:white;color:black;padding:0}
+  #topBar,#setup,#scores,#board,#questionModal,.reportBtns,h1,#csvSection{display:none!important}
+  #reportModal{display:block!important;position:static;padding:0}
+  #reportContent{max-width:100%;padding:0}
+  table{font-size:10px}
+  .teacherReport{font-size:11px;max-width:100%;line-height:1.15}
+  .teacherTitle{font-size:22px;margin:0 0 4px}
+  .teacherMeta{font-size:10px;margin-bottom:6px}
+  .miniPanel{padding:6px;margin-bottom:6px;box-shadow:none}
+  .miniPanel h2{font-size:13px;margin-bottom:4px}
+  .miniTable{font-size:10px}
+  .miniTable th,.miniTable td,.heatMap th,.heatMap td{padding:3px}
+  .heatMap{font-size:10px}
+  tr{page-break-inside:avoid}
+  .section{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div id="topBar"><button id="endGameBtn" onclick="endGame()">End Game</button></div>
+<h1>Product and Quotient Rule Jeopardy</h1>
+
+<div id="setup">
+<h2>Set Up Teams</h2>
+
+<details class="directionsBox">
+<summary>Read Directions</summary>
+<ol>
+<li>Read the question aloud and start a <b>2-minute timer</b>.</li>
+<li>Students solve independently on whiteboards.</li>
+<li><span class="important">Do not let students show whiteboards until the teacher has seen all final answers after 2 minutes.</span></li>
+<li>After 2 minutes, have teams hold/show final answers.</li>
+<li>Reveal the answer and briefly discuss reasoning or common mistakes.</li>
+<li>Use <b>Mark Correct</b> for every team that had the correct answer.</li>
+<li>Use <b>Award Points</b> only for the team earning Jeopardy points.</li>
+</ol>
+</details>
+<label>Number of Teams:</label>
+<select id="teamCount" onchange="makeTeamInputs()">
+<option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
+</select>
+<div id="teamInputs"></div>
+<button onclick="startGame()">Start Game</button>
+</div>
+
+<div id="scores"></div>
+<div id="board"></div>
+
+<div id="questionModal">
+<div id="card">
+<h2 id="qTitle"></h2>
+<div id="qText"></div>
+<button onclick="showAnswer()">Show Answer</button>
+<div id="answer" style="display:none;font-weight:bold"></div>
+<div id="scoreButtons"></div>
+<button onclick="closeCard()">Close</button>
+</div>
+</div>
+
+<div id="reportModal">
+<div id="reportContent"></div>
+</div>
+
+<script>
+let teams=[];
+let currentValue=0;
+let currentCell=null;
+let currentQuestion=null;
+let gameStartedAt=null;
+let questionLog={};
+let scoreEvents=[];
+
+const questions=[
+[
+{category:"Product Rule",value:100,question:"x³ · x⁵",answer:"x⁸",standard:"Exponent Rules: Product Rule",practice:"MP8",difficulty:1,type:"Procedural",successCriteria:"Add exponents when multiplying powers with the same base."},
+{category:"Product Rule",value:200,question:"a⁴ · a⁶",answer:"a¹⁰",standard:"Exponent Rules: Product Rule",practice:"MP8",difficulty:1,type:"Procedural",successCriteria:"Recognize repeated multiplication and add exponents."},
+{category:"Product Rule",value:300,question:"m⁷ · m²",answer:"m⁹",standard:"Exponent Rules: Product Rule",practice:"MP8",difficulty:2,type:"Procedural",successCriteria:"Apply product rule with larger exponents."},
+{category:"Product Rule",value:400,question:"3x² · 4x⁵",answer:"12x⁷",standard:"Exponent Rules: Product Rule",practice:"MP6",difficulty:3,type:"Procedural",successCriteria:"Multiply coefficients and add exponents accurately."},
+{category:"Product Rule",value:500,question:"-2a³ · 5a⁴",answer:"-10a⁷",standard:"Exponent Rules: Product Rule",practice:"MP6",difficulty:4,type:"Procedural",successCriteria:"Handle negative coefficients while applying the product rule."},
+{category:"Product Rule",value:600,question:"6m⁵ · 3m · m²",answer:"18m⁸",standard:"Exponent Rules: Product Rule",practice:"MP7",difficulty:5,type:"Multi-step",successCriteria:"Identify all like bases, multiply coefficients, and combine multiple exponent factors."}
+],
+[
+{category:"Quotient Rule",value:100,question:"x⁹ ÷ x⁴",answer:"x⁵",standard:"Exponent Rules: Quotient Rule",practice:"MP8",difficulty:1,type:"Procedural",successCriteria:"Subtract exponents when dividing powers with the same base."},
+{category:"Quotient Rule",value:200,question:"a⁸ ÷ a³",answer:"a⁵",standard:"Exponent Rules: Quotient Rule",practice:"MP8",difficulty:1,type:"Procedural",successCriteria:"Recognize repeated division and subtract exponents."},
+{category:"Quotient Rule",value:300,question:"m¹² ÷ m⁵",answer:"m⁷",standard:"Exponent Rules: Quotient Rule",practice:"MP8",difficulty:2,type:"Procedural",successCriteria:"Apply quotient rule with larger exponents."},
+{category:"Quotient Rule",value:400,question:"10x⁷ ÷ 2x³",answer:"5x⁴",standard:"Exponent Rules: Quotient Rule",practice:"MP6",difficulty:3,type:"Procedural",successCriteria:"Divide coefficients and subtract exponents accurately."},
+{category:"Quotient Rule",value:500,question:"18a⁹ ÷ 3a²",answer:"6a⁷",standard:"Exponent Rules: Quotient Rule",practice:"MP6",difficulty:4,type:"Procedural",successCriteria:"Use the quotient rule with coefficients and larger exponents."},
+{category:"Quotient Rule",value:600,question:"-24m¹⁰ ÷ 6m⁴",answer:"-4m⁶",standard:"Exponent Rules: Quotient Rule",practice:"MP6",difficulty:5,type:"Procedural",successCriteria:"Divide with a negative coefficient and subtract exponents accurately."}
+],
+[
+{category:"Challenge",value:100,question:"x⁴ · x³ ÷ x²",answer:"x⁵",standard:"Exponent Rules: Mixed Product and Quotient",practice:"MP7",difficulty:3,type:"Mixed Expression",successCriteria:"Use structure to combine product and quotient rules."},
+{category:"Challenge",value:200,question:"12a⁸ ÷ 3a³",answer:"4a⁵",standard:"Exponent Rules: Quotient Rule",practice:"MP6",difficulty:3,type:"Procedural",successCriteria:"Divide coefficients and subtract exponents."},
+{category:"Challenge",value:300,question:"2m³ · 5m² ÷ m⁴",answer:"10m",standard:"Exponent Rules: Mixed Product and Quotient",practice:"MP7",difficulty:4,type:"Mixed Expression",successCriteria:"Multiply coefficients, add exponents, then subtract exponents."},
+{category:"Challenge",value:400,question:"A student simplified x⁵ · x² to x¹⁰. What mistake did they make?",answer:"They multiplied the exponents instead of adding them.",standard:"Exponent Rules: Product Rule",practice:"MP3",difficulty:4,type:"Error Analysis",successCriteria:"Critique the reasoning and explain that product rule means add exponents."},
+{category:"Challenge",value:500,question:"A student simplified y⁹ ÷ y³ to y³. What mistake did they make?",answer:"They divided the exponents instead of subtracting them. The answer is y⁶.",standard:"Exponent Rules: Quotient Rule",practice:"MP3",difficulty:5,type:"Error Analysis",successCriteria:"Critique the reasoning and explain that quotient rule means subtract exponents."},
+{category:"Challenge",value:600,question:"Simplify: 4x⁶ · 3x² ÷ 2x³",answer:"6x⁵",standard:"Exponent Rules: Mixed Product and Quotient",practice:"MP7",difficulty:6,type:"Mixed Expression",successCriteria:"Use multiple exponent rules and coefficient operations in one expression."}
+]
+];
+
+const categories=["Product Rule","Quotient Rule","Challenge"];
+
+function makeTeamInputs(){
+let n=parseInt(document.getElementById("teamCount").value);
+let box=document.getElementById("teamInputs");
+box.innerHTML="";
+for(let i=1;i<=n;i++){box.innerHTML += `<div><label>Team ${i} Name: </label><input id="teamName${i}" value="Team ${i}"></div>`;}
+}
+
+function startGame(){
+let n=parseInt(document.getElementById("teamCount").value);
+teams=[];
+for(let i=1;i<=n;i++){let name=document.getElementById("teamName"+i).value.trim()||"Team "+i;teams.push({name:name,score:0});}
+gameStartedAt=new Date();
+document.getElementById("setup").style.display="none";
+renderScores();buildBoard();
+}
+
+function renderScores(){document.getElementById("scores").innerHTML=teams.map(t=>`<div class="scoreBox">${t.name}: ${t.score}</div>`).join("");}
+
+function buildBoard(){
+let b=document.getElementById("board");b.className="board";let html="";
+categories.forEach(c=>html+=`<div class='cell header'>${c}</div>`);
+[100,200,300,400,500,600].forEach((v,row)=>{categories.forEach((c,col)=>{html+=`<div class='cell clue' id='c${col}-${row}' onclick='openQ(${col},${row},this)'>$${v}</div>`;});});
+b.innerHTML=html;
+}
+
+function openQ(c,r,cell){
+if(cell.classList.contains("used")) return;
+currentCell=cell;
+currentQuestion=questions[c][r];
+currentValue=currentQuestion.value;
+let id=`c${c}-${r}`;
+currentQuestion.id=id;
+currentQuestion.answerShownTemp=false;
+document.getElementById("qTitle").innerText=currentQuestion.category+" - $"+currentQuestion.value;
+document.getElementById("qText").innerHTML=currentQuestion.question;
+document.getElementById("answer").innerHTML="Answer: "+currentQuestion.answer;
+document.getElementById("answer").style.display="none";
+document.getElementById("scoreButtons").innerHTML="";
+document.getElementById("questionModal").style.display="flex";
+}
+
+function ensureQuestionLog(){
+if(!currentQuestion) return null;
+let id=currentQuestion.id;
+if(!questionLog[id]){
+  questionLog[id]={...currentQuestion,openedAt:new Date(),gameAwardTeam:null,correctTeams:[],answerShown:!!currentQuestion.answerShownTemp};
+}
+return questionLog[id];
+}
+
+function showAnswer(){
+document.getElementById("answer").style.display="block";
+let buttons=`<div class="noteBox" style="text-align:left;margin:10px 0"><b>Step 1: Award Jeopardy points</b> to the one team that won the question.<br><b>Step 2: Mark learning data</b> for every team that answered correctly. The report uses Step 2.</div>`;
+buttons+=`<h3>1. Award points to ONE team</h3><div>`;
+teams.forEach((t,i)=>{buttons+=`<button class="scoreBtn" id="awardBtn${i}" onclick="toggleAward(${i})">Award ${t.name}</button>`;});
+buttons+=`</div><h3>2. Mark ALL teams that got it correct</h3><div>`;
+teams.forEach((t,i)=>{buttons+=`<button class="scoreBtn" id="correctBtn${i}" onclick="toggleCorrect(${i})">${t.name} Correct</button>`;});
+buttons+=`</div>`;
+document.getElementById("scoreButtons").innerHTML=buttons;
+if(currentQuestion){
+  currentQuestion.answerShownTemp=true;
+  if(questionLog[currentQuestion.id]) questionLog[currentQuestion.id].answerShown=true;
+}
+updateQuestionButtons();
+}
+
+function toggleAward(i){
+if(!currentQuestion) return;
+let qrec=ensureQuestionLog();
+let teamName=teams[i].name;
+if(qrec.gameAwardTeam===teamName){
+  teams[i].score-=currentValue;
+  qrec.gameAwardTeam=null;
+  scoreEvents.push({type:"removed",team:teamName,points:currentValue,questionId:currentQuestion.id,time:new Date()});
+}else{
+  if(qrec.gameAwardTeam){
+    let oldIndex=teams.findIndex(t=>t.name===qrec.gameAwardTeam);
+    if(oldIndex>=0) teams[oldIndex].score-=currentValue;
+    scoreEvents.push({type:"removed",team:qrec.gameAwardTeam,points:currentValue,questionId:currentQuestion.id,time:new Date()});
+  }
+  teams[i].score+=currentValue;
+  qrec.gameAwardTeam=teamName;
+  scoreEvents.push({type:"awarded",team:teamName,points:currentValue,questionId:currentQuestion.id,time:new Date()});
+  if(currentCell) currentCell.classList.add("used");
+}
+updateQuestionButtons();
+renderScores();
+}
+
+function toggleCorrect(i){
+if(!currentQuestion) return;
+let qrec=ensureQuestionLog();
+let teamName=teams[i].name;
+if(qrec.correctTeams.includes(teamName)){
+  qrec.correctTeams=qrec.correctTeams.filter(x=>x!==teamName);
+}else{
+  qrec.correctTeams.push(teamName);
+}
+if(currentCell) currentCell.classList.add("used");
+updateQuestionButtons();
+}
+
+function updateQuestionButtons(){
+if(!currentQuestion) return;
+let qrec=questionLog[currentQuestion.id];
+if(!qrec){
+  teams.forEach((t,i)=>{
+    let a=document.getElementById("awardBtn"+i);
+    if(a){a.classList.remove("awarded");a.innerHTML="Award "+t.name;}
+    let c=document.getElementById("correctBtn"+i);
+    if(c){c.classList.remove("awarded");c.innerHTML=t.name+" Correct";}
+  });
+  return;
+}
+teams.forEach((t,i)=>{
+  let a=document.getElementById("awardBtn"+i);
+  if(a){
+    if(qrec.gameAwardTeam===t.name){a.classList.add("awarded");a.innerHTML=t.name+" +"+currentValue;}
+    else{a.classList.remove("awarded");a.innerHTML="Award "+t.name;}
+  }
+  let c=document.getElementById("correctBtn"+i);
+  if(c){
+    if(qrec.correctTeams.includes(t.name)){c.classList.add("awarded");c.innerHTML=t.name+" ✓ Correct";}
+    else{c.classList.remove("awarded");c.innerHTML=t.name+" Correct";}
+  }
+});
+}
+
+function closeCard(){document.getElementById("questionModal").style.display="none";}
+
+function clean(s){return String(s).replaceAll("<br>"," ").replace(/<[^>]*>/g,"");}
+function pct(n,d){return d===0 ? "N/A" : Math.round((n/d)*100)+"%";}
+function statusClass(rate){if(rate===null)return""; if(rate>=75)return"green"; if(rate>=50)return"yellow"; return"red";}
+function statusLabel(rate){if(rate===null)return"Not enough data"; if(rate>=75)return"Strong"; if(rate>=50)return"Developing"; return"Needs Review";}
+
+function aggregateBy(field){
+ let agg={};
+ Object.values(questionLog).forEach(q=>{
+   let key=q[field];
+   if(!agg[key]) agg[key]={opened:0,questionsWithAnySuccess:0,totalTeamCorrect:0,totalTeamPossible:0,totalPointsEarned:0,questionRates:[]};
+   let rate = teams.length ? q.correctTeams.length / teams.length : 0;
+   agg[key].opened++;
+   agg[key].questionsWithAnySuccess += q.correctTeams.length > 0 ? 1 : 0;
+   agg[key].totalTeamCorrect += q.correctTeams.length;
+   agg[key].totalTeamPossible += teams.length;
+   agg[key].totalPointsEarned += q.correctTeams.length*q.value;
+   agg[key].questionRates.push(rate);
+ });
+ return agg;
+}
+
+function avgQuestionPct(s){
+ if(!s || !s.questionRates || s.questionRates.length===0) return null;
+ return Math.round((s.questionRates.reduce((a,b)=>a+b,0)/s.questionRates.length)*100);
+}
+function anyCorrectPct(s){return s.opened?Math.round((s.questionsWithAnySuccess/s.opened)*100):null;}
+function teamCorrectPct(s){return s.totalTeamPossible?Math.round((s.totalTeamCorrect/s.totalTeamPossible)*100):null;}
+function statusClass(rate){if(rate===null)return""; if(rate>=75)return"green"; if(rate>=50)return"yellow"; return"red";}
+function statusLabel(rate){if(rate===null)return"Not enough data"; if(rate>=75)return"Strong"; if(rate>=50)return"Developing"; return"Review";}
+function insightSentence(title,key,rate){
+ if(rate===null) return "Not enough data yet.";
+ if(rate>=75) return `${key} looked strong during the game.`;
+ if(rate>=50) return `${key} is developing; keep it in mixed practice.`;
+ return `${key} should be reviewed before moving on.`;
+}
+
+function makeInstructionalTable(title,agg,labelName="Area"){
+ let html=`<div class="section"><h2>${title}</h2><table><tr><th>${labelName}</th><th>Questions Played</th><th>Avg Question Success</th><th>Questions With Any Correct Team</th><th>Instructional Status</th><th>Teacher Note</th></tr>`;
+ Object.entries(agg).sort((a,b)=>String(a[0]).localeCompare(String(b[0]), undefined, {numeric:true})).forEach(([k,s])=>{
+   let avg=avgQuestionPct(s);
+   let any=anyCorrectPct(s);
+   html+=`<tr><td>${k}</td><td>${s.opened}</td><td class="${statusClass(avg)}">${avg===null?"N/A":avg+"%"}</td><td>${s.questionsWithAnySuccess} / ${s.opened} (${any===null?"N/A":any+"%"})</td><td class="${statusClass(avg)}">${statusLabel(avg)}</td><td>${insightSentence(title,k,avg)}</td></tr>`;
+ });
+ html+=`</table></div>`;
+ return html;
+}
+
+function getQuestionRows(){
+ return Object.values(questionLog).map(q=>{
+   let rate=teams.length ? Math.round((q.correctTeams.length/teams.length)*100) : 0;
+   let difficultyLabel = rate>=75 ? "Easy" : rate>=50 ? "Medium" : rate>0 ? "Hard" : "Very Hard / Reteach";
+   return {...q,teamRate:rate,difficultyLabel};
+ });
+}
+
+function makeQuestionDifficultyTable(rows){
+ let html=`<div class="section"><h2>Question Difficulty</h2><p>This is the most useful part of the report: it shows which exact questions were easy, medium, hard, or reteach-level based on how many teams earned points.</p>`;
+ html+=`<table><tr><th>Question</th><th>Category</th><th>Point Value</th><th>Teams Correct</th><th>Difficulty Result</th><th>Skill</th><th>Practice</th></tr>`;
+ rows.sort((a,b)=>a.category.localeCompare(b.category)||a.value-b.value).forEach(q=>{
+   let cls=statusClass(q.teamRate);
+   html+=`<tr><td>${clean(q.question)}</td><td>${q.category}</td><td>$${q.value}</td><td>${q.correctTeams.length} / ${teams.length}</td><td class="${cls}">${q.difficultyLabel} (${q.teamRate}%)</td><td>${q.standard}</td><td>${q.practice}</td></tr>`;
+ });
+ html+=`</table></div>`;
+ return html;
+}
+
+function generateInstructionalFindings(byStandard,byPractice,byType,rows){
+ function sorted(agg){return Object.entries(agg).filter(x=>x[1].opened>0).sort((a,b)=>avgQuestionPct(b[1])-avgQuestionPct(a[1]));}
+ let std=sorted(byStandard), mp=sorted(byPractice), typ=sorted(byType);
+ let hardestQs=[...rows].sort((a,b)=>a.teamRate-b.teamRate || b.value-a.value).slice(0,3);
+ let bullets=[];
+ if(std.length) bullets.push(`<li><b>Strongest skill:</b> ${std[0][0]} (${avgQuestionPct(std[0][1])}% average question success).</li>`);
+ if(std.length>1) bullets.push(`<li><b>Skill to review first:</b> ${std[std.length-1][0]} (${avgQuestionPct(std[std.length-1][1])}% average question success).</li>`);
+ if(mp.length) bullets.push(`<li><b>Strongest math practice evidence:</b> ${mp[0][0]} (${avgQuestionPct(mp[0][1])}%).</li>`);
+ if(mp.length>1) bullets.push(`<li><b>Practice to strengthen:</b> ${mp[mp.length-1][0]} (${avgQuestionPct(mp[mp.length-1][1])}%).</li>`);
+ if(typ.length) bullets.push(`<li><b>Question type pattern:</b> ${typ[typ.length-1][0]} had the lowest success and should appear in the next review.</li>`);
+ if(hardestQs.length) bullets.push(`<li><b>Best warm-up candidates:</b> ${hardestQs.map(q=>`${q.category} $${q.value}`).join(", ")}.</li>`);
+ bullets.push(`<li><b>Use caution:</b> this is team-game evidence, not individual mastery evidence. Use it to plan review, not to grade students.</li>`);
+ return `<ul>${bullets.join("")}</ul>`;
+}
+
+function generateSuggestedReview(rows,byStandard,byPractice,byType){
+ let lowRows=rows.filter(q=>q.teamRate<50);
+ let skills=[...new Set(lowRows.map(q=>q.standard))];
+ let practices=[...new Set(lowRows.map(q=>q.practice))];
+ let types=[...new Set(lowRows.map(q=>q.type))];
+ let html=`<div class="section"><h2>Suggested Review Plan</h2><div class="noteBox"><ol>`;
+ if(skills.length) html+=`<li>Start with a quick reteach on: <b>${skills.join("; ")}</b>.</li>`;
+ if(practices.length) html+=`<li>Add one math-practice prompt focused on: <b>${practices.join(", ")}</b>.</li>`;
+ if(types.length) html+=`<li>Use question formats students missed: <b>${types.join(", ")}</b>.</li>`;
+ if(lowRows.length) html+=`<li>Turn these into tomorrow's warm-up or exit ticket: <b>${lowRows.map(q=>`${q.category} $${q.value}`).join(", ")}</b>.</li>`;
+ if(!lowRows.length) html+=`<li>No question fell below 50%. Move to mixed review and ask students to explain the rule they used.</li>`;
+ html+=`</ol></div></div>`;
+ return html;
+}
+
+
+function xmlEscape(value){
+ return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function aggToChartData(agg){
+ return Object.entries(agg).map(([label,s])=>({label:String(label),value:avgQuestionPct(s) ?? 0,played:s.opened})).filter(d=>d.played>0).sort((a,b)=>b.value-a.value);
+}
+
+function svgBarChart(title,desc,data){
+ const width=720, rowH=42, top=58, left=220, right=58;
+ const height=Math.max(150, top + data.length*rowH + 20);
+ let html=`<div class="chartCard"><div class="chartTitle">${xmlEscape(title)}</div><div class="chartDesc">${xmlEscape(desc)}</div>`;
+ html+=`<svg class="chartSvg" viewBox="0 0 ${width} ${height}" role="img" aria-label="${xmlEscape(title)}">`;
+ html+=`<line x1="${left}" y1="${top-10}" x2="${width-right}" y2="${top-10}" stroke="#ddd"/>`;
+ [0,25,50,75,100].forEach(t=>{let x=left+(width-left-right)*(t/100);html+=`<line x1="${x}" y1="${top-16}" x2="${x}" y2="${height-18}" stroke="#eee"/><text x="${x}" y="${top-22}" text-anchor="middle" font-size="11" fill="#555">${t}%</text>`;});
+ data.forEach((d,i)=>{
+   let y=top+i*rowH;
+   let w=(width-left-right)*(d.value/100);
+   html+=`<text x="8" y="${y+20}" font-size="12" fill="#111">${xmlEscape(d.label.length>31?d.label.slice(0,30)+'…':d.label)}</text>`;
+   html+=`<rect x="${left}" y="${y}" width="${w}" height="24" rx="6" fill="#123c7a"/>`;
+   html+=`<text x="${Math.min(width-right+6,left+w+8)}" y="${y+17}" font-size="12" fill="#111">${d.value}%</text>`;
+ });
+ html+=`</svg></div>`;
+ return html;
+}
+
+function svgLineChart(title,desc,data){
+ const width=720,height=300,left=52,right=26,top=30,bottom=48;
+ let pts=data.map((d,i)=>{
+   let x=left+(width-left-right)*(data.length===1?0.5:i/(data.length-1));
+   let y=top+(height-top-bottom)*(1-d.value/100);
+   return {x,y,...d};
+ });
+ let path=pts.map((p,i)=>(i?'L':'M')+p.x+' '+p.y).join(' ');
+ let html=`<div class="chartCard"><div class="chartTitle">${xmlEscape(title)}</div><div class="chartDesc">${xmlEscape(desc)}</div>`;
+ html+=`<svg class="chartSvg" viewBox="0 0 ${width} ${height}" role="img" aria-label="${xmlEscape(title)}">`;
+ [0,25,50,75,100].forEach(t=>{let y=top+(height-top-bottom)*(1-t/100);html+=`<line x1="${left}" y1="${y}" x2="${width-right}" y2="${y}" stroke="#eee"/><text x="${left-10}" y="${y+4}" text-anchor="end" font-size="11" fill="#555">${t}%</text>`;});
+ html+=`<polyline points="${pts.map(p=>p.x+','+p.y).join(' ')}" fill="none" stroke="#123c7a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`;
+ pts.forEach(p=>{html+=`<circle cx="${p.x}" cy="${p.y}" r="6" fill="#123c7a"/><text x="${p.x}" y="${p.y-10}" text-anchor="middle" font-size="12" fill="#111">${p.value}%</text><text x="${p.x}" y="${height-20}" text-anchor="middle" font-size="12" fill="#111">${xmlEscape(p.label)}</text>`;});
+ html+=`<text x="${width/2}" y="${height-4}" text-anchor="middle" font-size="12" fill="#555">Question difficulty level</text>`;
+ html+=`</svg></div>`;
+ return html;
+}
+
+function generatePlotsSection(byStandard,byPractice,byDifficulty,byType,teamStats,rows){
+ let html=`<div class="section"><h2>Supplementary Plots</h2><p>These visuals summarize the learning data. They use the teams marked correct, not just the team that earned Jeopardy points.</p><div class="chartGrid">`;
+ html+=svgBarChart("Success Rate by Skill","Average percentage of teams marked correct for each content skill.",aggToChartData(byStandard));
+ html+=svgBarChart("Success Rate by Mathematical Practice","Average percentage of teams marked correct for each tagged math practice.",aggToChartData(byPractice));
+ html+=svgLineChart("Difficulty Curve","The report should usually slope downward as questions get harder.",aggToChartData(byDifficulty).sort((a,b)=>Number(a.label)-Number(b.label)));
+ let teamData=Object.entries(teamStats).map(([name,s])=>({label:name,value:rows.length?Math.round((s.correct/(rows.length))*100):0,played:rows.length})).sort((a,b)=>b.value-a.value);
+ html+=svgBarChart("Team Learning Accuracy","Percentage of played questions each team was marked correct on.",teamData);
+ html+=`</div></div>`;
+ return html;
+}
+
+function makeHeatMap(rows){
+ const cats=[...new Set(questions.flat().map(q=>q.category))];
+ const vals=[...new Set(questions.flat().map(q=>q.value))].sort((a,b)=>a-b);
+ let lookup={}; rows.forEach(q=>lookup[q.category+"|"+q.value]=q);
+ let html=`<div class="section"><h2>Board Heat Map</h2><p>Green = strong, yellow = developing, red = review, gray = not played.</p><table><tr><th>Category</th>${vals.map(v=>`<th>$${v}</th>`).join("")}</tr>`;
+ cats.forEach(c=>{
+   html+=`<tr><th>${c}</th>`;
+   vals.forEach(v=>{
+     let q=lookup[c+"|"+v];
+     if(!q){html+=`<td class="heatCell heatNotPlayed">—</td>`;return;}
+     let cls=q.teamRate>=75?"heatStrong":q.teamRate>=50?"heatDeveloping":"heatReview";
+     html+=`<td class="heatCell ${cls}">${q.teamRate}%<br><small>${q.correctTeams.length}/${teams.length}</small></td>`;
+   });
+   html+=`</tr>`;
+ });
+ html+=`</table></div>`;
+ return html;
+}
+
+function buildCSV(){
+  const rows=[];
+  const now=new Date().toISOString();
+  const opened=Object.values(questionLog);
+  const teamNames=teams.map(t=>t.name);
+  rows.push(["date","game_title","team","team_score","category","points","question","answer","standard","math_practice","difficulty","question_type","success_criteria","question_opened","answer_shown","marked_correct","game_points_awarded","game_award_team","teams_marked_correct"].join(","));
+  opened.forEach(q=>{
+    teamNames.forEach(team=>{
+      const scored=q.correctTeams.includes(team) ? 1 : 0;
+      const gameAwarded=q.gameAwardTeam===team ? q.value : 0;
+      const scoreObj=teams.find(t=>t.name===team);
+      rows.push([
+        csvEscape(now),
+        csvEscape("Product and Quotient Rule Jeopardy"),
+        csvEscape(team),
+        csvEscape(scoreObj ? scoreObj.score : 0),
+        csvEscape(q.category),
+        csvEscape(q.value),
+        csvEscape(clean(q.question)),
+        csvEscape(clean(q.answer)),
+        csvEscape(q.standard),
+        csvEscape(q.practice),
+        csvEscape(q.difficulty),
+        csvEscape(q.type),
+        csvEscape(q.successCriteria),
+        csvEscape(1),
+        csvEscape(q.answerShown ? 1 : 0),
+        csvEscape(scored),
+        csvEscape(gameAwarded),
+        csvEscape(q.gameAwardTeam || ""),
+        csvEscape(q.correctTeams.join("; "))
+      ].join(","));
+    });
+  });
+  return rows.join("\n");
+}
+
+function shortStandardName(s){
+  return String(s).replace("Exponent Rules: ","").replace("Mixed Product and Quotient","Mixed Expressions");
+}
+function practiceName(p){
+  const map={MP3:"MP3: Reasoning",MP6:"MP6: Precision",MP7:"MP7: Structure",MP8:"MP8: Patterns"};
+  return map[p] || p;
+}
+function teacherRowsFromAgg(agg, shorten=false){
+  return Object.entries(agg)
+    .filter(([k,s])=>s.opened>0)
+    .map(([k,s])=>({name:shorten?shortStandardName(k):practiceName(k), raw:k, rate:avgQuestionPct(s)??0, opened:s.opened}))
+    .sort((a,b)=>b.rate-a.rate);
+}
+function miniPerformanceTable(title, rows){
+  let html=`<div class="miniPanel"><h2>${title}</h2><table class="miniTable"><tr><th>Area</th><th>Success</th></tr>`;
+  rows.forEach(r=>{
+    html+=`<tr><td>${r.name}</td><td class="${statusClass(r.rate)}"><b>${r.rate}%</b></td></tr>`;
+  });
+  html+=`</table></div>`;
+  return html;
+}
+function getReviewRows(rows){
+  return rows.filter(q=>q.teamRate<50).sort((a,b)=>a.teamRate-b.teamRate || b.value-a.value).slice(0,5);
+}
+function teacherFindings(stdRows, mpRows, qRows){
+  const strongStd=stdRows[0];
+  const lowStd=stdRows[stdRows.length-1];
+  const strongMP=mpRows[0];
+  const lowMP=mpRows[mpRows.length-1];
+  let parts=[];
+  if(strongStd) parts.push(`Students were strongest with <b>${strongStd.name}</b> questions (${strongStd.rate}%).`);
+  if(lowStd && (!strongStd || lowStd.name!==strongStd.name)) parts.push(`The first review priority is <b>${lowStd.name}</b> (${lowStd.rate}%).`);
+  if(strongMP && lowMP && strongMP.raw!==lowMP.raw) parts.push(`Students showed more success with <b>${strongMP.name}</b> than <b>${lowMP.name}</b>.`);
+  const errorLow=qRows.some(q=>q.type==="Error Analysis" && q.teamRate<50);
+  const mixedLow=qRows.some(q=>q.type==="Mixed Expression" && q.teamRate<60);
+  if(mixedLow) parts.push(`Mixed-expression questions suggest students need more practice choosing and combining exponent rules.`);
+  if(errorLow) parts.push(`Include an error-analysis warm-up before the next assessment.`);
+  if(!parts.length) parts.push(`Students showed strong performance across the questions played. Continue with mixed review and explanation prompts.`);
+  return `<p>${parts.join(" ")}</p>`;
+}
+function suggestedNextLesson(stdRows, mpRows, reviewRows, qRows){
+  const lowStd=stdRows[stdRows.length-1];
+  const lowMP=mpRows[mpRows.length-1];
+  let items=[];
+  if(lowStd && lowStd.rate<70) items.push(`Review <b>${lowStd.name}</b>.`);
+  if(qRows.some(q=>q.type==="Mixed Expression" && q.teamRate<60)) items.push(`Practice 2–3 mixed product/quotient expressions.`);
+  if(qRows.some(q=>q.type==="Error Analysis" && q.teamRate<60)) items.push(`Use one error-analysis warm-up.`);
+  if(lowMP && lowMP.rate<70) items.push(`Add a short <b>${practiceName(lowMP.raw)}</b> explanation prompt.`);
+  if(reviewRows.length) items.push(`Revisit: <b>${reviewRows.map(q=>`${q.category} $${q.value}`).join(", ")}</b>.`);
+  if(!items.length) items.push(`Continue with mixed practice and ask students to justify which exponent rule they used.`);
+  return `<ul class="checkList">${items.slice(0,5).map(x=>`<li>${x}</li>`).join("")}</ul>`;
+}
+function teacherHeatMap(rows){
+ const cats=[...new Set(questions.flat().map(q=>q.category))];
+ const vals=[...new Set(questions.flat().map(q=>q.value))].sort((a,b)=>a-b);
+ let lookup={}; rows.forEach(q=>lookup[q.category+"|"+q.value]=q);
+ let html=`<div class="miniPanel fullWidth"><h2>Learning Heat Map</h2><table class="heatMap"><tr><th>Skill</th>${vals.map(v=>`<th>$${v}</th>`).join("")}</tr>`;
+ cats.forEach(c=>{
+   html+=`<tr><th>${c}</th>`;
+   vals.forEach(v=>{
+     let q=lookup[c+"|"+v];
+     if(!q){html+=`<td class="heatCell heatNotPlayed">—</td>`;return;}
+     let cls=q.teamRate>=75?"heatStrong":q.teamRate>=50?"heatDeveloping":"heatReview";
+     html+=`<td class="heatCell ${cls}">${q.teamRate}%</td>`;
+   });
+   html+=`</tr>`;
+ });
+ html+=`</table><div class="legend"><span class="legendBox heatStrong"></span> Strong <span class="legendBox heatDeveloping"></span> Developing <span class="legendBox heatReview"></span> Review</div></div>`;
+ return html;
+}
+function questionsToRevisitTable(reviewRows){
+ let html=`<div class="miniPanel fullWidth"><h2>Questions to Revisit</h2>`;
+ if(!reviewRows.length){
+   html+=`<p class="smallNote">No played questions fell below 50%.</p>`;
+ }else{
+   html+=`<table class="miniTable"><tr><th>Question</th><th>Skill</th><th>Success</th></tr>`;
+   reviewRows.forEach(q=>{html+=`<tr><td>${q.category} $${q.value}: ${clean(q.question)}</td><td>${shortStandardName(q.standard)}</td><td class="${statusClass(q.teamRate)}"><b>${q.teamRate}%</b></td></tr>`;});
+   html+=`</table>`;
+ }
+ html+=`</div>`;
+ return html;
+}
+
+function endGame(){
+  const now=new Date();
+  const opened=Object.values(questionLog);
+  const byStandard=aggregateBy("standard");
+  const byPractice=aggregateBy("practice");
+  const questionRows=getQuestionRows();
+  const csv=buildCSV();
+  const stdRows=teacherRowsFromAgg(byStandard,true);
+  const mpRows=teacherRowsFromAgg(byPractice,false);
+  const reviewRows=getReviewRows(questionRows);
+  let report=`<div class="reportBtns"><button onclick="window.print()">Download / Save PDF</button><button onclick="downloadCSV()">Download CSV</button><button onclick="document.getElementById('reportModal').style.display='none'">Return</button></div>`;
+  report+=`<div class="teacherReport">`;
+  report+=`<h1 class="teacherTitle">Exponent Rules Jeopardy Summary</h1>`;
+  report+=`<div class="teacherMeta"><span>${now.toLocaleDateString()}</span><span>${opened.length} questions played</span><span>${teams.length} teams</span></div>`;
+  report+=`<div class="teacherGrid twoCols">`;
+  report+=miniPerformanceTable("Standards Performance",stdRows);
+  report+=miniPerformanceTable("Mathematical Practices",mpRows);
+  report+=`</div>`;
+  report+=`<div class="miniPanel fullWidth"><h2>Key Findings</h2>${teacherFindings(stdRows,mpRows,questionRows)}</div>`;
+  report+=questionsToRevisitTable(reviewRows);
+  report+=`<div class="miniPanel fullWidth"><h2>Suggested Next Lesson</h2>${suggestedNextLesson(stdRows,mpRows,reviewRows,questionRows)}</div>`;
+  report+=teacherHeatMap(questionRows);
+  report+=`<div class="reportFooter">Generated from teams marked correct during gameplay. CSV keeps the full question-level data.</div>`;
+  report+=`</div>`;
+  report+=`<div class="section" id="csvSection"><h2>CSV Backup</h2><p>If the download button is blocked, copy this into a file named <b>jeopardy_results.csv</b>.</p><textarea id="csvBox">${csv.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</textarea><div class="reportBtns"><button onclick="copyCSV()">Copy CSV</button></div></div>`;
+  document.getElementById("reportContent").innerHTML=report;
+  document.getElementById("reportModal").style.display="block";
+}
+function csvEscape(value){let s=String(value ?? "").replace(/"/g,'""');return `"${s}"`;}
+
+function downloadCSV(){
+  const csv=buildCSV();
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  const link=document.createElement("a");
+  link.href=URL.createObjectURL(blob);
+  link.download="jeopardy_results_for_R.csv";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function copyCSV(){
+  const box=document.getElementById("csvBox");
+  if(box){box.select();document.execCommand("copy");alert("CSV copied. Paste it into a .csv file or spreadsheet.");}
+}
+
+makeTeamInputs();
+</script>
+</body>
+</html>
